@@ -347,7 +347,7 @@ const BottomCTA = ({ onGetStarted, onSignIn }) => (
 ══════════════════════════════════════════════════════ */
 export default function Landing({ onGetStarted, onSignIn }) {
   return (
-    <div style={{ maxWidth: '480px', margin: '0 auto', overflowX: 'hidden' }}>
+    <div style={{ overflowX: 'hidden' }}>
       <Hero        onGetStarted={onGetStarted} onSignIn={onSignIn} />
       <Problem />
       <Features />
