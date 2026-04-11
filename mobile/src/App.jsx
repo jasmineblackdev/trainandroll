@@ -25,6 +25,7 @@ import DOTReminders from './screens/DOTReminders'
 import PrivacyData from './screens/PrivacyData'
 import HelpSupport from './screens/HelpSupport'
 import DOTExamPrep from './screens/DOTExamPrep'
+import Landing from './screens/Landing'
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import './App.css'
@@ -33,8 +34,19 @@ const AppRoutes = () => {
   const { isAuthenticated } = useAuth()
   const { completed } = useOnboarding()
   const [showRegister, setShowRegister] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
 
   if (!isAuthenticated) {
+    if (!showAuth) {
+      return (
+        <div style={{ overflowY: 'auto', height: '100vh' }}>
+          <Landing
+            onGetStarted={() => { setShowRegister(true); setShowAuth(true) }}
+            onSignIn={() => { setShowRegister(false); setShowAuth(true) }}
+          />
+        </div>
+      )
+    }
     return showRegister
       ? <Register onSwitch={() => setShowRegister(false)} />
       : <Login onSwitch={() => setShowRegister(true)} />

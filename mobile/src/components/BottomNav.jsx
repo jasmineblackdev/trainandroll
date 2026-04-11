@@ -27,10 +27,10 @@ import {
 import { useAuth } from '../context/AuthContext'
 
 const primaryNav = [
-  { path: '/',         icon: Home,           label: 'Home'      },
-  { path: '/workouts', icon: Dumbbell,       label: 'Workouts'  },
-  { path: '/nutrition',icon: Utensils,       label: 'Nutrition' },
-  { path: '/checkin',  icon: ClipboardCheck, label: 'Check-In'  },
+  { path: '/',          icon: Home,           label: 'Home'      },
+  { path: '/workouts',  icon: Dumbbell,       label: 'Workouts'  },
+  { path: '/locations', icon: MapPin,         label: 'Gyms'      },
+  { path: '/checkin',   icon: ClipboardCheck, label: 'Check-In'  },
 ]
 
 const moreNav = [

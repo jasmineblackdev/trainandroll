@@ -27,19 +27,18 @@ const GOALS = [
 const StepWelcome = ({ onNext }) => (
   <div className="ob-step" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
     <div className="ob-hero">
-      <img src="/logo.png" alt="Train&Roll" style={{ height: '80px', width: 'auto', marginBottom: '16px' }} />
-      <h1 className="ob-title">Welcome to Train&Roll</h1>
+      <img src="/logo.png" alt="Train&Roll" style={{ height: '56px', width: 'auto', marginBottom: '20px' }} />
+      <h1 className="ob-title">Stay Fit. Stay Certified.<br />Stay Driving.</h1>
       <p className="ob-subtitle">
-        Your health co-pilot built for life on the road. Stay DOT-ready,
-        workout anywhere, and take control of your health — one mile at a time.
+        Prevent DOT physical failures with training built specifically for truck drivers.
       </p>
     </div>
 
     <div className="ob-feature-list">
       {[
-        { icon: HeartPulse, text: 'Track DOT health metrics'       },
-        { icon: Dumbbell,   text: 'Workouts for any truck stop'    },
-        { icon: Target,     text: 'Personalized DOT readiness plan'},
+        { icon: Dumbbell,   text: 'Workouts in-truck, at rest stops, or any motel' },
+        { icon: HeartPulse, text: 'Track DOT health metrics in real time'           },
+        { icon: Target,     text: 'Know your readiness score before exam day'       },
       ].map(({ icon: Icon, text }) => (
         <div className="ob-feature-row" key={text}>
           <div className="ob-feature-icon-wrap">
