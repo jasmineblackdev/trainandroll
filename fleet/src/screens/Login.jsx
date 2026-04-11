@@ -45,7 +45,6 @@ const Login = () => {
         {/* Brand */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <img src="/logo.png" alt="Train&Roll" style={{ height: '56px', width: 'auto', margin: '0 auto 16px', display: 'block' }} />
-          <h1 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>Train&Roll Fleet</h1>
           <p style={{ color: '#6b7280', fontSize: '14px' }}>Fleet manager portal</p>
         </div>
 
