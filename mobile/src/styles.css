@@ -1,0 +1,220 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * TRAIN & ROLL — DOT readiness for truck drivers.
+ * Design language: rugged industrial. Steel charcoals, asphalt blacks,
+ * highway-blue primary (preserved from original), amber DOT-warning accent,
+ * stencil/condensed display type for headings, monospace for stats.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-steel: var(--steel);
+  --color-asphalt: var(--asphalt);
+  --color-amber-line: var(--amber-line);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --font-display: "Oswald", "Bebas Neue", Impact, system-ui, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Roboto Mono", ui-monospace, monospace;
+
+  --shadow-card: 0 1px 0 0 oklch(1 0 0 / 0.6) inset, 0 2px 8px -2px oklch(0 0 0 / 0.08);
+  --shadow-pop: 0 8px 24px -8px oklch(0.2 0.04 265 / 0.18);
+  --shadow-deep: 0 20px 60px -20px oklch(0.15 0.04 265 / 0.45);
+
+  --gradient-highway: linear-gradient(160deg, oklch(0.18 0.04 265) 0%, oklch(0.28 0.12 260) 55%, oklch(0.45 0.18 258) 100%);
+  --gradient-amber: linear-gradient(135deg, oklch(0.78 0.16 75) 0%, oklch(0.7 0.18 50) 100%);
+  --gradient-steel: linear-gradient(180deg, oklch(0.98 0.005 250) 0%, oklch(0.94 0.008 250) 100%);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Brand palette — preserves original highway blue */
+  --background: oklch(0.985 0.003 250);   /* warm off-white #f7f7f5-ish */
+  --foreground: oklch(0.18 0.03 260);     /* near-black charcoal */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.03 260);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.03 260);
+
+  /* Royal blue — matches logo wordmark "&Roll" */
+  --primary: oklch(0.55 0.21 260);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.95 0.012 255);
+  --secondary-foreground: oklch(0.22 0.05 265);
+
+  --muted: oklch(0.96 0.008 255);
+  --muted-foreground: oklch(0.5 0.02 260);
+
+  /* Deep navy — matches logo "Train" + truck silhouette */
+  --accent: oklch(0.32 0.13 265);
+  --accent-foreground: oklch(0.99 0 0);
+
+  --destructive: oklch(0.6 0.22 28);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.9 0.012 255);
+  --input: oklch(0.9 0.012 255);
+  --ring: oklch(0.55 0.21 260);
+
+  /* Status — DOT semantic */
+  --success: oklch(0.65 0.18 145);
+  --warning: oklch(0.78 0.17 80);
+  --danger:  oklch(0.6 0.22 28);
+
+  /* Brand surfaces — navy from the logo */
+  --steel: oklch(0.93 0.012 255);
+  --asphalt: oklch(0.22 0.1 265);          /* deep navy, like logo "Train" */
+  --amber-line: oklch(0.62 0.22 260);      /* royal-blue hazard stripe */
+
+  --chart-1: oklch(0.55 0.21 260);
+  --chart-2: oklch(0.32 0.13 265);
+  --chart-3: oklch(0.7 0.14 250);
+  --chart-4: oklch(0.6 0.22 28);
+  --chart-5: oklch(0.45 0.05 260);
+}
+
+.dark {
+  --background: oklch(0.15 0.02 260);
+  --foreground: oklch(0.98 0.003 250);
+  --card: oklch(0.2 0.025 260);
+  --card-foreground: oklch(0.98 0.003 250);
+  --popover: oklch(0.2 0.025 260);
+  --popover-foreground: oklch(0.98 0.003 250);
+  --primary: oklch(0.65 0.2 260);
+  --primary-foreground: oklch(0.15 0.05 265);
+  --secondary: oklch(0.26 0.04 265);
+  --secondary-foreground: oklch(0.98 0.003 250);
+  --muted: oklch(0.26 0.04 265);
+  --muted-foreground: oklch(0.7 0.02 255);
+  --accent: oklch(0.55 0.21 260);
+  --accent-foreground: oklch(0.99 0 0);
+  --destructive: oklch(0.65 0.22 28);
+  --destructive-foreground: oklch(0.98 0.003 250);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.65 0.2 260);
+  --steel: oklch(0.26 0.04 265);
+  --asphalt: oklch(0.14 0.06 265);
+}
+
+/* Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap");
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    /* asphalt backdrop on wider screens makes the app feel like a device */
+    background:
+      radial-gradient(ellipse at top, oklch(0.96 0.005 250) 0%, oklch(0.92 0.01 250) 100%);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  .num, .font-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Industrial accents */
+.hazard-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--amber-line) 0 12px,
+    var(--asphalt) 12px 24px
+  );
+}
+
+.dot-grid {
+  background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+.diagonal-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 8px,
+    oklch(0 0 0 / 0.04) 8px 9px
+  );
+}
+
+/* Hide scrollbar but allow scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Phone-app shell - full bleed always */
+.app-shell {
+  min-height: 100dvh;
+  width: 100%;
+  background: var(--color-background);
+  position: relative;
+}
+
+/* Reusable animations */
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 oklch(from var(--success) l c h / 0.5); }
+  100% { box-shadow: 0 0 0 16px oklch(from var(--success) l c h / 0); }
+}
+.pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker { animation: ticker 30s linear infinite; }
