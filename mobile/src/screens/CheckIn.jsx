@@ -24,7 +24,7 @@ const FaceScale = ({ label, field, value, onChange }) => {
   const labels = SCALE_LABELS[field]
   return (
     <div style={{ marginBottom: '22px' }}>
-      <label style={{ fontWeight: '600', fontSize: '15px', display: 'block', marginBottom: '10px', color: '#1f2937' }}>
+      <label style={{ fontWeight: '600', fontSize: '15px', display: 'block', marginBottom: '10px', color: 'var(--text-primary)' }}>
         {label}
       </label>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
@@ -40,8 +40,8 @@ const FaceScale = ({ label, field, value, onChange }) => {
               style={{
                 padding: '12px 4px',
                 borderRadius: '14px',
-                border: active ? '2px solid #2563eb' : '2px solid #e5e7eb',
-                background: active ? '#eff6ff' : 'white',
+                border: active ? '2px solid var(--brand)' : '2px solid var(--border)',
+                background: active ? 'var(--brand-surface)' : 'var(--bg-surface)',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
@@ -52,7 +52,7 @@ const FaceScale = ({ label, field, value, onChange }) => {
               }}
             >
               <span style={{ fontSize: '26px', lineHeight: 1 }}>{face}</span>
-              <span style={{ fontSize: '11px', fontWeight: '600', color: active ? '#2563eb' : '#4b5563' }}>
+              <span style={{ fontSize: '11px', fontWeight: '600', color: active ? 'var(--brand)' : '#4b5563' }}>
                 {labels[i]}
               </span>
             </button>
@@ -72,7 +72,7 @@ const WATER_OPTIONS = [
 
 const WaterChips = ({ value, onChange }) => (
   <div style={{ marginBottom: '22px' }}>
-    <label style={{ fontWeight: '600', fontSize: '15px', display: 'block', marginBottom: '10px', color: '#1f2937' }}>
+    <label style={{ fontWeight: '600', fontSize: '15px', display: 'block', marginBottom: '10px', color: 'var(--text-primary)' }}>
       Water Intake
     </label>
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
@@ -87,8 +87,8 @@ const WaterChips = ({ value, onChange }) => (
             style={{
               padding: '12px 4px',
               borderRadius: '14px',
-              border: active ? '2px solid #2563eb' : '2px solid #e5e7eb',
-              background: active ? '#eff6ff' : 'white',
+              border: active ? '2px solid var(--brand)' : '2px solid var(--border)',
+              background: active ? 'var(--brand-surface)' : 'var(--bg-surface)',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
@@ -99,8 +99,8 @@ const WaterChips = ({ value, onChange }) => (
             }}
           >
             <span style={{ fontSize: '18px' }}>💧</span>
-            <span style={{ fontSize: '13px', fontWeight: '700', color: active ? '#2563eb' : '#1f2937' }}>{label}</span>
-            <span style={{ fontSize: '10px', color: active ? '#2563eb' : '#6b7280' }}>{sub}</span>
+            <span style={{ fontSize: '13px', fontWeight: '700', color: active ? 'var(--brand)' : 'var(--text-primary)' }}>{label}</span>
+            <span style={{ fontSize: '10px', color: active ? 'var(--brand)' : 'var(--text-muted)' }}>{sub}</span>
           </button>
         )
       })}
@@ -138,17 +138,17 @@ const CheckIn = () => {
     <div className="screen">
       <header style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }}>Daily Check-In</h1>
-        <p style={{ color: '#4b5563', fontSize: '14px' }}>Takes about 15 seconds</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Takes about 15 seconds</p>
       </header>
 
       <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <p style={{ fontWeight: '600', fontSize: '16px' }}>Check-In Streak</p>
-          <p style={{ color: '#4b5563', fontSize: '14px' }}>Keep it going!</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Keep it going!</p>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#2563eb' }}>{currentStreak}</p>
-          <p style={{ fontSize: '12px', color: '#4b5563' }}>days</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--brand)' }}>{currentStreak}</p>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>days</p>
         </div>
       </div>
 
@@ -159,13 +159,13 @@ const CheckIn = () => {
             <div key={key} style={{ textAlign: 'center' }}>
               <div style={{
                 width: '32px', height: '32px', borderRadius: '50%',
-                background: done ? '#22c55e' : '#e5e7eb',
+                background: done ? 'var(--status-green)' : 'var(--border-strong)',
                 margin: '0 auto 4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 {done && <CheckCircle2 size={16} color="white" />}
               </div>
-              <span style={{ fontSize: '12px', color: '#4b5563' }}>{label}</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{label}</span>
             </div>
           ))}
         </div>
@@ -175,12 +175,12 @@ const CheckIn = () => {
         <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
           <CheckCircle2 size={48} color="#22c55e" style={{ margin: '0 auto 16px' }} />
           <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px' }}>Check-In Complete!</h3>
-          <p style={{ color: '#4b5563', fontSize: '14px' }}>Great job tracking your wellness today. See you tomorrow!</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Great job tracking your wellness today. See you tomorrow!</p>
         </div>
       ) : (
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-            <ClipboardCheck size={20} style={{ color: '#2563eb', marginRight: '8px' }} />
+            <ClipboardCheck size={20} style={{ color: 'var(--brand)', marginRight: '8px' }} />
             <h3 style={{ fontSize: '18px', fontWeight: '600' }}>How are you feeling?</h3>
           </div>
 

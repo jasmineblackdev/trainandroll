@@ -53,10 +53,10 @@ const BreakdownBar = ({ label, pts, max }) => {
   return (
     <div style={{ marginBottom: '8px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-        <span style={{ fontSize: '13px', color: '#4b5563' }}>{label}</span>
+        <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{label}</span>
         <span style={{ fontSize: '13px', fontWeight: '600', color }}>{pts}/{max}</span>
       </div>
-      <div style={{ height: '5px', background: '#f3f4f6', borderRadius: '3px' }}>
+      <div style={{ height: '5px', background: 'var(--bg-muted)', borderRadius: '3px' }}>
         <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: '3px', transition: 'width 0.3s' }} />
       </div>
     </div>
@@ -159,18 +159,18 @@ const Dashboard = () => {
           <h1 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '2px' }}>
             Hey {firstName}
           </h1>
-          <p style={{ color: '#4b5563', fontSize: '14px' }}>CDL: {cdlNumber}</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>CDL: {cdlNumber}</p>
         </div>
         <Link to="/checkin" aria-label="Daily check-in" style={{ textDecoration: 'none' }}>
           <div style={{
             width: '48px', height: '48px', borderRadius: '50%',
-            background: todayDone ? '#dcfce7' : '#eff6ff',
-            border: `2px solid ${todayDone ? '#86efac' : '#bfdbfe'}`,
+            background: todayDone ? 'var(--status-green-bg)' : 'var(--brand-surface)',
+            border: `2px solid ${todayDone ? 'var(--status-green-border)' : 'var(--brand-border)'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {todayDone
               ? <CheckCircle2 size={24} color="#15803d" />
-              : <ClipboardCheck size={22} color="#2563eb" />
+              : <ClipboardCheck size={22} color="var(--brand)" />
             }
           </div>
         </Link>
@@ -260,10 +260,10 @@ const Dashboard = () => {
         to={todayAction.path}
         style={{ textDecoration: 'none', color: 'inherit' }}
       >
-        <div className="card" style={{ border: '1.5px solid #bfdbfe', background: '#eff6ff', marginBottom: '16px' }}>
+        <div className="card" style={{ border: '1.5px solid var(--brand-border)', background: 'var(--brand-surface)', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <Zap size={16} color="#2563eb" />
-            <span style={{ fontSize: '12px', fontWeight: '700', color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <Zap size={16} color="var(--brand)" />
+            <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--brand-text-on)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Today's Action
             </span>
           </div>
@@ -280,10 +280,10 @@ const Dashboard = () => {
 
       {/* ── CARD 3: Getting Started (dismissible, new users only) ── */}
       {showGS && (
-        <div className="card" style={{ border: '1.5px solid #e5e7eb', marginBottom: '16px' }}>
+        <div className="card" style={{ border: '1.5px solid var(--border)', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-            <CheckCircle2 size={18} color="#2563eb" />
-            <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e40af' }}>Getting Started</h3>
+            <CheckCircle2 size={18} color="var(--brand)" />
+            <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--brand-text-on)' }}>Getting Started</h3>
             <span style={{ marginLeft: 'auto', fontSize: '13px', color: '#3b82f6', fontWeight: '600' }}>
               {gsSteps.filter(s => s.done).length}/{gsSteps.length} done
             </span>
@@ -291,7 +291,7 @@ const Dashboard = () => {
               onClick={dismissGS}
               aria-label="Dismiss getting started"
               style={{
-                background: '#f3f4f6', border: 'none', borderRadius: '50%',
+                background: 'var(--bg-muted)', border: 'none', borderRadius: '50%',
                 width: '26px', height: '26px', display: 'flex', alignItems: 'center',
                 justifyContent: 'center', cursor: 'pointer', marginLeft: '6px',
               }}
@@ -300,12 +300,12 @@ const Dashboard = () => {
             </button>
           </div>
           {gsSteps.map((s) => (
-            <Link key={s.label} to={s.path} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 0', textDecoration: 'none', borderBottom: '1px solid #f3f4f6', color: 'inherit' }}>
-              <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${s.done ? '#16a34a' : '#93c5fd'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: s.done ? '#dcfce7' : 'white' }}>
+            <Link key={s.label} to={s.path} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 0', textDecoration: 'none', borderBottom: '1px solid var(--border)', color: 'inherit' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${s.done ? '#16a34a' : 'var(--brand-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: s.done ? 'var(--status-green-bg)' : 'var(--bg-surface)' }}>
                 {s.done && <CheckCircle2 size={12} color="#16a34a" />}
               </div>
               <span style={{ fontSize: '15px', color: s.done ? '#4b5563' : '#1e40af', textDecoration: s.done ? 'line-through' : 'none', flex: 1 }}>{s.label}</span>
-              {!s.done && <ChevronRight size={14} color="#2563eb" />}
+              {!s.done && <ChevronRight size={14} color="var(--brand)" />}
             </Link>
           ))}
         </div>
@@ -315,26 +315,26 @@ const Dashboard = () => {
       <div className="card" style={{ marginBottom: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Current Metrics</h3>
-          <Link to="/health-history" style={{ fontSize: '14px', color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Log reading →</Link>
+          <Link to="/health-history" style={{ fontSize: '14px', color: 'var(--brand)', textDecoration: 'none', fontWeight: '500' }}>Log reading →</Link>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '22px', fontWeight: 'bold', color: '#2563eb' }}>{weight}</p>
-            <p style={{ color: '#4b5563', fontSize: '14px' }}>Weight (lbs)</p>
+            <p style={{ fontSize: '22px', fontWeight: 'bold', color: 'var(--brand)' }}>{weight}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Weight (lbs)</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '22px', fontWeight: 'bold', color: systolic >= 140 ? '#dc2626' : '#2563eb' }}>
               {systolic}/{diastolic}
             </p>
-            <p style={{ color: '#4b5563', fontSize: '14px' }}>Blood Pressure</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Blood Pressure</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '22px', fontWeight: 'bold', color: bmiColor }}>{bmi ?? '—'}</p>
-            <p style={{ color: '#4b5563', fontSize: '14px' }}>BMI</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>BMI</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '22px', fontWeight: 'bold', color: glucoseColor }}>{bloodGlucose}</p>
-            <p style={{ color: '#4b5563', fontSize: '14px' }}>Glucose (mg/dL)</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Glucose (mg/dL)</p>
           </div>
         </div>
       </div>
@@ -367,13 +367,13 @@ const Dashboard = () => {
                 scrollSnapAlign: 'start',
                 padding: '14px',
                 borderRadius: '12px',
-                background: primary ? '#eff6ff' : 'white',
-                border: primary ? '1.5px solid #bfdbfe' : '1px solid #e5e7eb',
+                background: primary ? 'var(--brand-surface)' : 'var(--bg-surface)',
+                border: primary ? '1.5px solid var(--brand-border)' : '1px solid var(--border)',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
                 display: 'flex', flexDirection: 'column', gap: '8px',
               }}
             >
-              <Icon size={22} color="#2563eb" />
+              <Icon size={22} color="var(--brand)" />
               <div>
                 <p style={{ fontWeight: '600', fontSize: '15px', marginBottom: '2px' }}>{label}</p>
                 <p style={{ fontSize: '12px', color: primary ? '#3b82f6' : '#4b5563' }}>{sub}</p>
@@ -390,7 +390,7 @@ const Dashboard = () => {
           <p style={{ fontSize: '14px', marginBottom: '14px', opacity: 0.9 }}>
             Unlock full workout library, DOT reminders, and personalized plans
           </p>
-          <Link to="/pricing" className="btn-secondary" style={{ background: 'white', color: '#2563eb', fontSize: '14px', display: 'inline-block', textDecoration: 'none' }}>
+          <Link to="/pricing" className="btn-secondary" style={{ background: 'white', color: 'var(--brand)', fontSize: '14px', display: 'inline-block', textDecoration: 'none' }}>
             Learn More
           </Link>
         </div>

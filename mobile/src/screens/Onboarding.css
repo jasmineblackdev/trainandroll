@@ -407,6 +407,14 @@
 
 .ob-btn-next:active { transform: translateY(0); }
 
+/* Helper text under inputs */
+.ob-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 /* Safe area on mobile */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .ob-nav {
