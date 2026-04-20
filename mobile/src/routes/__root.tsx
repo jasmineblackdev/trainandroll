@@ -1,6 +1,5 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
 
-import appCss from "../styles.css?url";
 import { AuthProvider, OnboardingProvider } from "../lib/auth";
 
 function NotFoundComponent() {
@@ -22,43 +21,9 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#1d4ed8" },
-      { title: "Train & Roll — DOT-Ready Fitness for Truck Drivers" },
-      { name: "description", content: "Stay fit. Stay certified. Stay driving. Driver-built workouts, gym locator, and DOT readiness tracking for CDL holders." },
-      { name: "author", content: "Train & Roll" },
-      { property: "og:title", content: "Train & Roll — DOT-Ready Fitness for Truck Drivers" },
-      { property: "og:description", content: "Workouts, gym locator, and DOT readiness tracking built for life on the road." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: "/favicon.png" },
-      { rel: "apple-touch-icon", href: "/favicon.png" },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
-
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function RootComponent() {
   return (
