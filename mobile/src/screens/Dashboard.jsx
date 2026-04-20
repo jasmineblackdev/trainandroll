@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Activity,
@@ -11,6 +11,7 @@ import {
   Brain,
   ChevronRight,
   Zap,
+  X,
 } from 'lucide-react'
 import {
   mockUser,
@@ -25,6 +26,8 @@ import {
 } from '../data/mockData'
 import { useOnboarding } from '../context/OnboardingContext'
 import { useAuth } from '../context/AuthContext'
+
+const GS_DISMISSED_KEY = 'dw_gs_dismissed'
 
 // ── Mini SVG sparkline for the readiness trend ──────────────────
 const Sparkline = ({ data, color = '#2563eb', height = 36 }) => {
@@ -50,8 +53,8 @@ const BreakdownBar = ({ label, pts, max }) => {
   return (
     <div style={{ marginBottom: '8px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-        <span style={{ fontSize: '12px', color: '#6b7280' }}>{label}</span>
-        <span style={{ fontSize: '12px', fontWeight: '600', color }}>{pts}/{max}</span>
+        <span style={{ fontSize: '13px', color: '#4b5563' }}>{label}</span>
+        <span style={{ fontSize: '13px', fontWeight: '600', color }}>{pts}/{max}</span>
       </div>
       <div style={{ height: '5px', background: '#f3f4f6', borderRadius: '3px' }}>
         <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: '3px', transition: 'width 0.3s' }} />
@@ -66,6 +69,15 @@ const Dashboard = () => {
   const { data: ob } = useOnboarding()
   const { user: authUser } = useAuth()
   const isPro = authUser?.subscriptionTier === 'driver_pro'
+
+  const [gsDismissed, setGsDismissed] = useState(() => {
+    try { return localStorage.getItem(GS_DISMISSED_KEY) === '1' } catch { return false }
+  })
+
+  const dismissGS = () => {
+    try { localStorage.setItem(GS_DISMISSED_KEY, '1') } catch {}
+    setGsDismissed(true)
+  }
 
   const name            = ob.name            || mockUser.name
   const cdlNumber       = ob.cdlNumber       || mockUser.cdlNumber
@@ -96,11 +108,8 @@ const Dashboard = () => {
     (new Date(dotPhysicalDate) - new Date()) / (1000 * 60 * 60 * 24)
   )
 
-  // 30-day readiness trend
   const trend30 = getReadinessTrend(30, height)
-  const trendColor = dotStatus.status === 'green' ? '#15803d' : dotStatus.status === 'yellow' ? '#a16207' : '#dc2626'
 
-  // Getting started checklist
   const hasHealthRecord   = !!localStorage.getItem('dw_health_records')
   const hasDotReminder    = !!localStorage.getItem('dw_dot_reminders')
   const gsSteps = [
@@ -109,12 +118,10 @@ const Dashboard = () => {
     { done: hasDotReminder,  label: 'Set a DOT physical reminder',        path: '/dot-reminders'  },
   ]
   const gsAllDone = gsSteps.every(s => s.done)
-  const showGS    = checkInStreak === 0 && !gsAllDone
+  const showGS    = checkInStreak === 0 && !gsAllDone && !gsDismissed
 
-  // Milestone badges
   const activeMilestones = DOT_MILESTONES.filter(d => daysUntilDot <= d && daysUntilDot > 0)
 
-  // Score ring color mapping
   const scoreColors = {
     green:  { bg: '#dcfce7', text: '#15803d', border: '#86efac', ring: '#22c55e' },
     yellow: { bg: '#fef9c3', text: '#a16207', border: '#fde047', ring: '#eab308' },
@@ -122,10 +129,26 @@ const Dashboard = () => {
   }
   const sc = scoreColors[dotStatus.status]
 
+  // Inline insurance tier (was a separate card)
+  const score = dotStatus.score || 0
+  const tier = score >= 70
+    ? { label: 'Preferred Risk', color: '#15803d', badge: '✓' }
+    : score >= 50
+    ? { label: 'Standard Risk',  color: '#a16207', badge: '↑' }
+    : { label: 'Elevated Risk',  color: '#dc2626', badge: '!' }
+
   const bmiColor     = bmi ? (bmi < 25 ? '#15803d' : bmi < 30 ? '#a16207' : '#dc2626') : '#2563eb'
   const glucoseColor = bloodGlucose < 100 ? '#15803d' : bloodGlucose < 126 ? '#a16207' : '#dc2626'
 
   const firstName = name.split(' ')[0]
+
+  const quickActions = [
+    { to: '/workouts',        icon: Clock,          label: 'Workouts', sub: `${mockWorkouts.filter(w => w.space === 'in-truck').length} in-cab`, primary: false },
+    { to: '/dot-prep',        icon: CheckCircle2,   label: 'Exam Prep', sub: 'Checklist', primary: true  },
+    { to: '/locations',       icon: MapPin,         label: 'Gyms',      sub: 'Nearby',    primary: false },
+    { to: '/progress',        icon: TrendingUp,     label: 'Progress',  sub: 'Trends',    primary: false },
+    { to: '/mental-wellness', icon: Brain,          label: 'Wellness',  sub: 'Breathing', primary: false },
+  ]
 
   return (
     <div className="screen">
@@ -136,34 +159,43 @@ const Dashboard = () => {
           <h1 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '2px' }}>
             Hey {firstName}
           </h1>
-          <p style={{ color: '#6b7280', fontSize: '13px' }}>CDL: {cdlNumber}</p>
+          <p style={{ color: '#4b5563', fontSize: '14px' }}>CDL: {cdlNumber}</p>
         </div>
-        <Link to="/checkin" style={{ textDecoration: 'none' }}>
+        <Link to="/checkin" aria-label="Daily check-in" style={{ textDecoration: 'none' }}>
           <div style={{
-            width: '44px', height: '44px', borderRadius: '50%',
+            width: '48px', height: '48px', borderRadius: '50%',
             background: todayDone ? '#dcfce7' : '#eff6ff',
             border: `2px solid ${todayDone ? '#86efac' : '#bfdbfe'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {todayDone
-              ? <CheckCircle2 size={22} color="#15803d" />
-              : <ClipboardCheck size={20} color="#2563eb" />
+              ? <CheckCircle2 size={24} color="#15803d" />
+              : <ClipboardCheck size={22} color="#2563eb" />
             }
           </div>
         </Link>
       </header>
 
-      {/* ── HERO: DOT Readiness Score ───────────────────────── */}
+      {/* ── CARD 1: DOT Readiness Score (with inline insurance tier) ── */}
       <div className="card" style={{ background: sc.bg, border: `1.5px solid ${sc.border}`, marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <Activity size={18} color={sc.text} />
-          <span style={{ fontWeight: '700', fontSize: '13px', color: sc.text, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            DOT Readiness Score
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity size={18} color={sc.text} />
+            <span style={{ fontWeight: '700', fontSize: '13px', color: sc.text, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              DOT Readiness Score
+            </span>
+          </div>
+          {/* Inline insurance tier pill */}
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            padding: '3px 9px', borderRadius: '999px', fontSize: '11px', fontWeight: '700',
+            background: 'white', color: tier.color, border: `1px solid ${tier.color}33`,
+          }}>
+            {tier.badge} {tier.label}
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '16px' }}>
-          {/* Score circle */}
           <div style={{
             width: '88px', height: '88px', borderRadius: '50%', flexShrink: 0,
             background: 'white', border: `4px solid ${sc.ring}`,
@@ -174,7 +206,6 @@ const Dashboard = () => {
             <span style={{ fontSize: '10px', color: sc.text, opacity: 0.7, fontWeight: '600' }}>/ 100</span>
           </div>
 
-          {/* Status + trend */}
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
               {dotStatus.status === 'green'
@@ -183,20 +214,18 @@ const Dashboard = () => {
               }
               <span style={{ fontWeight: '700', fontSize: '18px', color: sc.text }}>{dotStatus.message}</span>
             </div>
-            <p style={{ fontSize: '13px', color: sc.text, opacity: 0.8, marginBottom: '8px' }}>
+            <p style={{ fontSize: '14px', color: sc.text, opacity: 0.85, marginBottom: '8px' }}>
               {daysUntilDot > 0
                 ? `Next exam in ${daysUntilDot} days`
                 : 'DOT physical is overdue!'}
             </p>
-            {/* 30-day sparkline */}
-            <div style={{ opacity: 0.8 }}>
+            <div style={{ opacity: 0.85 }}>
               <Sparkline data={trend30} color={sc.ring} height={32} />
-              <p style={{ fontSize: '10px', color: sc.text, opacity: 0.6, marginTop: '2px' }}>30-day trend</p>
+              <p style={{ fontSize: '11px', color: sc.text, opacity: 0.7, marginTop: '2px' }}>30-day trend</p>
             </div>
           </div>
         </div>
 
-        {/* Score breakdown bars */}
         {dotStatus.breakdown && (
           <div style={{ borderTop: `1px solid ${sc.border}`, paddingTop: '12px' }}>
             {Object.values(dotStatus.breakdown).map(item => (
@@ -205,12 +234,11 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Milestone badges */}
         {activeMilestones.length > 0 && (
           <div style={{ marginTop: '10px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {activeMilestones.map(m => (
               <span key={m} style={{
-                padding: '3px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: '600',
+                padding: '3px 8px', borderRadius: '999px', fontSize: '12px', fontWeight: '600',
                 background: 'rgba(0,0,0,0.08)', color: sc.text,
               }}>{m}-day milestone</span>
             ))}
@@ -218,42 +246,16 @@ const Dashboard = () => {
         )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-          <p style={{ fontSize: '10px', color: sc.text, opacity: 0.6 }}>
+          <p style={{ fontSize: '11px', color: sc.text, opacity: 0.7 }}>
             Per FMCSA 49 CFR §391.41
           </p>
-          <Link to="/progress" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: sc.text, textDecoration: 'none', fontWeight: '600' }}>
+          <Link to="/progress" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', color: sc.text, textDecoration: 'none', fontWeight: '600' }}>
             View full trend <ChevronRight size={14} />
           </Link>
         </div>
       </div>
 
-      {/* ── Insurance Risk Tier ─────────────────────────────── */}
-      {(() => {
-        const score = dotStatus.score || 0
-        const tier = score >= 70
-          ? { label: 'Preferred Risk',  color: '#15803d', bg: '#f0fdf4', border: '#86efac', desc: 'You qualify for wellness premium discounts with most commercial carriers.', badge: '✓' }
-          : score >= 50
-          ? { label: 'Standard Risk',   color: '#a16207', bg: '#fffbeb', border: '#fde68a', desc: 'Improving your DOT score to 70+ could unlock lower insurance premiums.', badge: '↑' }
-          : { label: 'Elevated Risk',   color: '#dc2626', bg: '#fef2f2', border: '#fca5a5', desc: 'Drivers in this tier see higher premiums. Focus on BP and glucose first.', badge: '!' }
-        return (
-          <div className="card" style={{ border: `1.5px solid ${tier.border}`, background: tier.bg, marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '11px', fontWeight: '700', color: tier.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                  Insurance Risk Profile
-                </p>
-                <p style={{ fontSize: '18px', fontWeight: '800', color: tier.color, marginBottom: '4px' }}>{tier.label}</p>
-                <p style={{ fontSize: '12px', color: '#6b7280', lineHeight: '1.5' }}>{tier.desc}</p>
-              </div>
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: tier.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: '12px' }}>
-                <span style={{ fontSize: '18px', color: 'white', fontWeight: '800' }}>{tier.badge}</span>
-              </div>
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* ── Today's Recommended Action ──────────────────────── */}
+      {/* ── CARD 2: Today's Recommended Action ──────────────── */}
       <Link
         to={todayAction.path}
         style={{ textDecoration: 'none', color: 'inherit' }}
@@ -269,29 +271,40 @@ const Dashboard = () => {
             <span style={{ fontSize: '32px', flexShrink: 0 }}>{todayAction.icon}</span>
             <div style={{ flex: 1 }}>
               <p style={{ fontWeight: '700', fontSize: '16px', color: '#1e3a8a', marginBottom: '3px' }}>{todayAction.label}</p>
-              <p style={{ fontSize: '13px', color: '#3b82f6' }}>{todayAction.reason}</p>
+              <p style={{ fontSize: '14px', color: '#3b82f6' }}>{todayAction.reason}</p>
             </div>
             <ChevronRight size={18} color="#3b82f6" />
           </div>
         </div>
       </Link>
 
-      {/* ── Getting Started Checklist ────────────────────────── */}
+      {/* ── CARD 3: Getting Started (dismissible, new users only) ── */}
       {showGS && (
         <div className="card" style={{ border: '1.5px solid #e5e7eb', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
             <CheckCircle2 size={18} color="#2563eb" />
             <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e40af' }}>Getting Started</h3>
-            <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#3b82f6', fontWeight: '600' }}>
+            <span style={{ marginLeft: 'auto', fontSize: '13px', color: '#3b82f6', fontWeight: '600' }}>
               {gsSteps.filter(s => s.done).length}/{gsSteps.length} done
             </span>
+            <button
+              onClick={dismissGS}
+              aria-label="Dismiss getting started"
+              style={{
+                background: '#f3f4f6', border: 'none', borderRadius: '50%',
+                width: '26px', height: '26px', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', cursor: 'pointer', marginLeft: '6px',
+              }}
+            >
+              <X size={14} color="#4b5563" />
+            </button>
           </div>
           {gsSteps.map((s) => (
-            <Link key={s.label} to={s.path} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', textDecoration: 'none', borderBottom: '1px solid #f3f4f6', color: 'inherit' }}>
-              <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${s.done ? '#16a34a' : '#93c5fd'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: s.done ? '#dcfce7' : 'white' }}>
-                {s.done && <CheckCircle2 size={10} color="#16a34a" />}
+            <Link key={s.label} to={s.path} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 0', textDecoration: 'none', borderBottom: '1px solid #f3f4f6', color: 'inherit' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${s.done ? '#16a34a' : '#93c5fd'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: s.done ? '#dcfce7' : 'white' }}>
+                {s.done && <CheckCircle2 size={12} color="#16a34a" />}
               </div>
-              <span style={{ fontSize: '14px', color: s.done ? '#6b7280' : '#1e40af', textDecoration: s.done ? 'line-through' : 'none', flex: 1 }}>{s.label}</span>
+              <span style={{ fontSize: '15px', color: s.done ? '#4b5563' : '#1e40af', textDecoration: s.done ? 'line-through' : 'none', flex: 1 }}>{s.label}</span>
               {!s.done && <ChevronRight size={14} color="#2563eb" />}
             </Link>
           ))}
@@ -302,93 +315,82 @@ const Dashboard = () => {
       <div className="card" style={{ marginBottom: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Current Metrics</h3>
-          <Link to="/health-history" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Log reading →</Link>
+          <Link to="/health-history" style={{ fontSize: '14px', color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Log reading →</Link>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '22px', fontWeight: 'bold', color: '#2563eb' }}>{weight}</p>
-            <p style={{ color: '#6b7280', fontSize: '12px' }}>Weight (lbs)</p>
+            <p style={{ color: '#4b5563', fontSize: '14px' }}>Weight (lbs)</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '22px', fontWeight: 'bold', color: systolic >= 140 ? '#dc2626' : '#2563eb' }}>
               {systolic}/{diastolic}
             </p>
-            <p style={{ color: '#6b7280', fontSize: '12px' }}>Blood Pressure</p>
+            <p style={{ color: '#4b5563', fontSize: '14px' }}>Blood Pressure</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '22px', fontWeight: 'bold', color: bmiColor }}>{bmi ?? '—'}</p>
-            <p style={{ color: '#6b7280', fontSize: '12px' }}>BMI</p>
+            <p style={{ color: '#4b5563', fontSize: '14px' }}>BMI</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '22px', fontWeight: 'bold', color: glucoseColor }}>{bloodGlucose}</p>
-            <p style={{ color: '#6b7280', fontSize: '12px' }}>Glucose (mg/dL)</p>
+            <p style={{ color: '#4b5563', fontSize: '14px' }}>Glucose (mg/dL)</p>
           </div>
         </div>
       </div>
 
-      {/* ── Quick Actions ────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-        <Link to="/checkin" className="card" style={{ textDecoration: 'none', color: 'inherit', marginBottom: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-            <ClipboardCheck size={18} style={{ color: '#2563eb' }} />
-            <span style={{ marginLeft: '8px', fontWeight: '600', fontSize: '14px' }}>Daily Check-In</span>
-          </div>
-          <p style={{ fontSize: '12px', color: todayDone ? '#15803d' : '#6b7280' }}>
-            {todayDone ? '✓ Done today' : `${checkInStreak} day streak`}
-          </p>
-        </Link>
-
-        <Link to="/workouts" className="card" style={{ textDecoration: 'none', color: 'inherit', marginBottom: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-            <Clock size={18} style={{ color: '#2563eb' }} />
-            <span style={{ marginLeft: '8px', fontWeight: '600', fontSize: '14px' }}>Workouts</span>
-          </div>
-          <p style={{ fontSize: '12px', color: '#6b7280' }}>
-            {mockWorkouts.filter(w => w.space === 'in-truck').length} in-cab routines
-          </p>
-        </Link>
-
-        <Link to="/dot-prep" className="card" style={{ textDecoration: 'none', color: 'inherit', marginBottom: 0, border: '1.5px solid #bfdbfe', background: '#f0f7ff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-            <CheckCircle2 size={18} style={{ color: '#2563eb' }} />
-            <span style={{ marginLeft: '8px', fontWeight: '600', fontSize: '14px' }}>Exam Prep</span>
-          </div>
-          <p style={{ fontSize: '12px', color: '#3b82f6' }}>DOT prep checklist</p>
-        </Link>
-
-        <Link to="/locations" className="card" style={{ textDecoration: 'none', color: 'inherit', marginBottom: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-            <MapPin size={18} style={{ color: '#2563eb' }} />
-            <span style={{ marginLeft: '8px', fontWeight: '600', fontSize: '14px' }}>Find Gyms</span>
-          </div>
-          <p style={{ fontSize: '12px', color: '#6b7280' }}>Nearby locations</p>
-        </Link>
-
-        <Link to="/progress" className="card" style={{ textDecoration: 'none', color: 'inherit', marginBottom: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-            <TrendingUp size={18} style={{ color: '#2563eb' }} />
-            <span style={{ marginLeft: '8px', fontWeight: '600', fontSize: '14px' }}>Progress</span>
-          </div>
-          <p style={{ fontSize: '12px', color: '#6b7280' }}>View health trends</p>
-        </Link>
-
-        <Link to="/mental-wellness" className="card" style={{ textDecoration: 'none', color: 'inherit', marginBottom: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-            <Brain size={18} style={{ color: '#2563eb' }} />
-            <span style={{ marginLeft: '8px', fontWeight: '600', fontSize: '14px' }}>Wellness</span>
-          </div>
-          <p style={{ fontSize: '12px', color: '#6b7280' }}>Breathing & stress</p>
-        </Link>
+      {/* ── Quick Actions (horizontal scroll) ────────────────── */}
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', padding: '0 2px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Quick Actions</h3>
+          <Link to="/checkin" style={{ fontSize: '14px', color: todayDone ? '#15803d' : '#2563eb', textDecoration: 'none', fontWeight: '600' }}>
+            {todayDone ? '✓ Checked in' : `${checkInStreak}-day streak →`}
+          </Link>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            gap: '12px',
+            overflowX: 'auto',
+            paddingBottom: '8px',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {quickActions.map(({ to, icon: Icon, label, sub, primary }) => (
+            <Link
+              key={to}
+              to={to}
+              style={{
+                textDecoration: 'none', color: 'inherit',
+                flexShrink: 0, width: '128px',
+                scrollSnapAlign: 'start',
+                padding: '14px',
+                borderRadius: '12px',
+                background: primary ? '#eff6ff' : 'white',
+                border: primary ? '1.5px solid #bfdbfe' : '1px solid #e5e7eb',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                display: 'flex', flexDirection: 'column', gap: '8px',
+              }}
+            >
+              <Icon size={22} color="#2563eb" />
+              <div>
+                <p style={{ fontWeight: '600', fontSize: '15px', marginBottom: '2px' }}>{label}</p>
+                <p style={{ fontSize: '12px', color: primary ? '#3b82f6' : '#4b5563' }}>{sub}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* ── Upgrade Prompt (Free Users) ──────────────────────── */}
       {!isPro && (
         <div className="card" style={{ background: 'linear-gradient(135deg, #2563eb, #3b82f6)', color: 'white' }}>
           <h3 style={{ fontSize: '17px', fontWeight: '700', marginBottom: '6px' }}>Upgrade to Premium</h3>
-          <p style={{ fontSize: '13px', marginBottom: '14px', opacity: 0.9 }}>
+          <p style={{ fontSize: '14px', marginBottom: '14px', opacity: 0.9 }}>
             Unlock full workout library, DOT reminders, and personalized plans
           </p>
-          <Link to="/pricing" className="btn-secondary" style={{ background: 'white', color: '#2563eb', fontSize: '13px', display: 'inline-block', textDecoration: 'none' }}>
+          <Link to="/pricing" className="btn-secondary" style={{ background: 'white', color: '#2563eb', fontSize: '14px', display: 'inline-block', textDecoration: 'none' }}>
             Learn More
           </Link>
         </div>
