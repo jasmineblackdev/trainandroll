@@ -4,6 +4,5 @@
   "installCommand": "npm install",
   "outputDirectory": "dist",
   "framework": null,
-  "functions": {},
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
