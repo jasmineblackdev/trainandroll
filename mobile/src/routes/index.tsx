@@ -55,7 +55,7 @@ function Hero() {
           <div className="mt-7 flex flex-col gap-3">
             <Link
               to="/onboarding"
-              className="group inline-flex items-center justify-between rounded-xl bg-accent px-5 py-4 font-display text-asphalt shadow-[0_10px_30px_-10px_oklch(0.78_0.16_75)]"
+              className="group inline-flex items-center justify-between rounded-xl bg-accent px-5 py-4 font-display text-white"
             >
               <span className="tracking-widest">Start free — 30 days</span>
               <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
