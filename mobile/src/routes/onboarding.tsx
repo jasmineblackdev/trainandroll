@@ -9,6 +9,7 @@ import {
   MapPin,
   Activity,
   Sparkles,
+  IdCard,
 } from "lucide-react";
 import { useOnboarding } from "../lib/auth";
 import logoUrl from "@/assets/logo.png";
@@ -47,7 +48,42 @@ const steps: Step[] = [
   },
 ];
 
-type Screen = "intro" | "quiz" | "done";
+type Screen = "intro" | "basics" | "quiz" | "done";
+
+type Basics = {
+  firstName: string;
+  lastName: string;
+  age: string;
+  dob: string;
+  cdlNumber: string;
+};
+
+const BASICS_KEY = "tnr_profile";
+
+const emptyBasics: Basics = { firstName: "", lastName: "", age: "", dob: "", cdlNumber: "" };
+
+function loadBasics(): Basics {
+  try {
+    const raw = localStorage.getItem(BASICS_KEY);
+    if (raw) return { ...emptyBasics, ...JSON.parse(raw) };
+  } catch {}
+  return emptyBasics;
+}
+
+function saveBasics(b: Basics) {
+  try { localStorage.setItem(BASICS_KEY, JSON.stringify(b)); } catch {}
+}
+
+function ageFromDob(dob: string): string {
+  if (!dob) return "";
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return "";
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age >= 0 && age < 120 ? String(age) : "";
+}
 
 function OnboardingPage() {
   const nav = useNavigate();
@@ -56,6 +92,7 @@ function OnboardingPage() {
   const [screen, setScreen] = React.useState<Screen>("intro");
   const [step, setStep] = React.useState(0);
   const [picks, setPicks] = React.useState<Record<string, string>>({});
+  const [basics, setBasics] = React.useState<Basics>(() => loadBasics());
 
   const total = steps.length;
   const progress = ((step + 1) / total) * 100;
@@ -70,6 +107,7 @@ function OnboardingPage() {
   };
 
   const finish = () => {
+    saveBasics(basics);
     complete();
     nav({ to: "/dashboard" });
   };
@@ -78,13 +116,23 @@ function OnboardingPage() {
     <div className="min-h-screen bg-white text-asphalt">
       <div className="hazard-stripes h-2" />
 
-      {screen === "intro" && <IntroScreen onStart={() => setScreen("quiz")} />}
+      {screen === "intro" && <IntroScreen onStart={() => setScreen("basics")} />}
+
+      {screen === "basics" && (
+        <BasicsScreen
+          basics={basics}
+          setBasics={setBasics}
+          onBack={() => setScreen("intro")}
+          onNext={() => { saveBasics(basics); setScreen("quiz"); }}
+          onSkip={() => setScreen("quiz")}
+        />
+      )}
 
       {screen === "quiz" && (
         <div className="mx-auto max-w-[480px] px-6 pt-6 pb-10">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => (step > 0 ? setStep(step - 1) : setScreen("intro"))}
+              onClick={() => (step > 0 ? setStep(step - 1) : setScreen("basics"))}
               aria-label="Back"
               className="grid h-10 w-10 place-items-center rounded-full border border-asphalt/10 bg-white hover:bg-asphalt/5"
             >
@@ -139,7 +187,7 @@ function OnboardingPage() {
         </div>
       )}
 
-      {screen === "done" && <DoneScreen picks={picks} onFinish={finish} />}
+      {screen === "done" && <DoneScreen picks={picks} basics={basics} onFinish={finish} />}
     </div>
   );
 }
@@ -158,7 +206,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 
       <div className="mt-12">
         <span className="inline-flex items-center gap-2 rounded-full border border-asphalt/15 bg-asphalt/5 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
-          <ShieldCheck size={12} /> 2 minutes · 4 quick questions
+          <ShieldCheck size={12} /> 2 minutes · a few quick questions
         </span>
 
         <h1 className="mt-5 font-display text-[36px] leading-[1] tracking-tight text-asphalt">
@@ -166,8 +214,8 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         </h1>
 
         <p className="mt-4 text-[15px] leading-relaxed text-asphalt/70">
-          Four questions so Train&nbsp;&amp;&nbsp;Roll can build a workout + readiness plan that
-          actually fits your truck, your clock, and your DOT date.
+          Tell us who you are and how you drive so Train&nbsp;&amp;&nbsp;Roll can build a workout
+          and readiness plan that actually fits your truck, your clock, and your DOT date.
         </p>
 
         <ul className="mt-8 space-y-3">
@@ -201,10 +249,183 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
   );
 }
 
+/* ─────────────── Basics ─────────────── */
+
+function BasicsScreen({
+  basics,
+  setBasics,
+  onBack,
+  onNext,
+  onSkip,
+}: {
+  basics: Basics;
+  setBasics: React.Dispatch<React.SetStateAction<Basics>>;
+  onBack: () => void;
+  onNext: () => void;
+  onSkip: () => void;
+}) {
+  const update = (patch: Partial<Basics>) => setBasics((b) => ({ ...b, ...patch }));
+
+  const onDobChange = (dob: string) => {
+    const auto = ageFromDob(dob);
+    // If age was previously empty OR was auto-derived from an old DOB, update it.
+    update({ dob, age: auto || basics.age });
+  };
+
+  const canContinue =
+    basics.firstName.trim().length > 0 && basics.lastName.trim().length > 0;
+
+  return (
+    <div className="mx-auto max-w-[480px] px-6 pt-6 pb-10">
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onBack}
+          aria-label="Back"
+          className="grid h-10 w-10 place-items-center rounded-full border border-asphalt/10 bg-white hover:bg-asphalt/5"
+        >
+          <ArrowLeft size={16} />
+        </button>
+        <span className="font-mono text-[11px] uppercase tracking-widest text-asphalt/60">
+          About you
+        </span>
+        <button onClick={onSkip} className="text-xs font-semibold text-asphalt/60 hover:text-asphalt">
+          Skip
+        </button>
+      </div>
+
+      <p className="mt-10 font-mono text-[10px] uppercase tracking-[0.3em] text-primary">
+        Profile setup
+      </p>
+      <h1 className="mt-2 font-display text-[30px] leading-tight text-asphalt">The basics</h1>
+      <p className="mt-2 text-sm text-asphalt/60">
+        Just the essentials so we can personalize your plan and keep DOT dates on track.
+      </p>
+
+      <div className="mt-6 space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <Field
+            label="First name"
+            value={basics.firstName}
+            onChange={(v) => update({ firstName: v })}
+            placeholder="Jake"
+            autoComplete="given-name"
+          />
+          <Field
+            label="Last name"
+            value={basics.lastName}
+            onChange={(v) => update({ lastName: v })}
+            placeholder="Miller"
+            autoComplete="family-name"
+          />
+        </div>
+
+        <Field
+          label="Date of birth"
+          type="date"
+          value={basics.dob}
+          onChange={onDobChange}
+          autoComplete="bday"
+        />
+
+        <Field
+          label="Age"
+          type="number"
+          value={basics.age}
+          onChange={(v) => update({ age: v })}
+          placeholder="42"
+          inputMode="numeric"
+          hint={basics.dob ? "Auto-filled from your date of birth — you can edit it." : undefined}
+        />
+
+        <Field
+          label="CDL number"
+          value={basics.cdlNumber}
+          onChange={(v) => update({ cdlNumber: v.toUpperCase() })}
+          placeholder="CDL-TX-123456"
+          icon={IdCard}
+          hint="Printed on the front of your commercial license."
+        />
+      </div>
+
+      <button
+        onClick={onNext}
+        disabled={!canContinue}
+        className="group mt-8 inline-flex w-full items-center justify-between rounded-xl bg-accent px-5 py-4 font-display text-white disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className="tracking-widest">Continue</span>
+        <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+      </button>
+
+      {!canContinue && (
+        <p className="mt-3 text-center text-[12px] text-asphalt/50">
+          First and last name required to continue.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  autoComplete,
+  inputMode,
+  icon: Icon,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+  autoComplete?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  hint?: string;
+}) {
+  const id = React.useId();
+  return (
+    <label htmlFor={id} className="block">
+      <span className="text-[12px] font-semibold uppercase tracking-wider text-asphalt/60">
+        {label}
+      </span>
+      <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-asphalt/15 bg-white px-3 py-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+        {Icon && <Icon size={16} className="text-asphalt/40" />}
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          inputMode={inputMode}
+          className="w-full bg-transparent text-[15px] text-asphalt placeholder:text-asphalt/30 outline-none"
+        />
+      </div>
+      {hint && <p className="mt-1.5 text-[12px] text-asphalt/50">{hint}</p>}
+    </label>
+  );
+}
+
 /* ─────────────── Done ─────────────── */
 
-function DoneScreen({ picks, onFinish }: { picks: Record<string, string>; onFinish: () => void }) {
+function DoneScreen({
+  picks,
+  basics,
+  onFinish,
+}: {
+  picks: Record<string, string>;
+  basics: Basics;
+  onFinish: () => void;
+}) {
+  const fullName = [basics.firstName, basics.lastName].filter(Boolean).join(" ");
   const summary: { label: string; value: string }[] = [
+    { label: "Name",          value: fullName || "—" },
+    { label: "Age",           value: basics.age || "—" },
+    { label: "CDL",           value: basics.cdlNumber || "—" },
     { label: "Driver type",   value: picks.driver || "—" },
     { label: "Next DOT",      value: picks.dot    || "—" },
     { label: "Top goal",      value: picks.goal   || "—" },
@@ -219,7 +440,7 @@ function DoneScreen({ picks, onFinish }: { picks: Record<string, string>; onFini
         </div>
         <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.3em] text-primary">Plan ready</p>
         <h1 className="mt-2 font-display text-[30px] leading-tight text-asphalt">
-          You're all set — let's ride.
+          {basics.firstName ? `Welcome aboard, ${basics.firstName}.` : "You're all set — let's ride."}
         </h1>
         <p className="mt-3 max-w-sm text-sm text-asphalt/70">
           Your workouts and readiness score will calibrate as you log check-ins.
